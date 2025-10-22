@@ -73,7 +73,7 @@ def download_file(url, download_location, username, password, download_if_exists
             content = response.content
 
             # Decrypt if anticipated
-            if encrypted_aes_key is not None and iv is not None:
+            if encrypted_aes_key is not None and iv is not None and not url.endswith('stop_training.txt'):
                 content = decrypt_message(content, encrypted_aes_key, iv, private_rsa_key)
             file.write(content)
         return True

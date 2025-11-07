@@ -16,6 +16,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 # Add path to parent dir of this Python file: https://stackoverflow.com/questions/3430372/
 sys.path.append(str(pathlib.Path(__file__).parent.resolve()))
 from deep_learning.model import get_weights
+import shutil
 
 
 def file_present_in_moderator_ws(url, username, password):
@@ -223,7 +224,7 @@ def send_test_df_to_moderator(test_df_for_server, client_name, workspace_path_cl
     test_df_for_server.to_csv(test_df_path, index=False)
     upload_file(url_upload, test_df_path, upload_username, upload_password, aes_key, iv)
 
-
+ 
 def clean_up_workspace(workspace_dir_path, who):
     """
     Clean up workspace by removing, moving and copying files and dirs
@@ -234,7 +235,7 @@ def clean_up_workspace(workspace_dir_path, who):
     # Remove __pycache__
     pycache_path = os.path.join(workspace_dir_path, '__pycache__')
     if os.path.exists(pycache_path):
-        os.system(f'rm -r {pycache_path}')
+        shutil.rmtree(pycache_path)
 
     # Create unique experiment folder (date and time)
     date_time_folder_name = f'{str(dt.datetime.now().strftime("%Y-%m-%d_%Hh%Mm%Ss"))}'
@@ -266,7 +267,7 @@ def clean_up_workspace(workspace_dir_path, who):
             if (any(file.endswith(ext) for ext in ['.png', '.csv'])
                     or file in ['overall_test_mae.txt', 'final_model.txt']):
                 dest_file_path = os.path.join(date_time_folder_path, 'results', file)
-                os.system(f'mv {src_file_path} {dest_file_path}')
+                shutil.move(src_file_path, dest_file_path)
             # Settings files
             elif (any(file.endswith(ext) for ext in ['.json', 'ws_path.txt', 'dataset_size.txt', '.py',
                                                     'stop_training.txt', 'aes_key.txt', 'iv.txt', 'public_rsa_key.txt',
@@ -274,26 +275,26 @@ def clean_up_workspace(workspace_dir_path, who):
                   or (any(file.startswith(prefix) for prefix in ['server_aes_key_for', 'server_iv_for']))):
                 dest_file_path = os.path.join(date_time_folder_path, 'settings', file)
                 if file == f'FL_settings_{who}.json':
-                    os.system(f'cp {src_file_path} {dest_file_path}')
+                    shutil.copyfile(src_file_path, dest_file_path)
                 elif file in ['architecture.py', 'FL_plan.json'] and who == 'server':
-                    os.system(f'cp {src_file_path} {dest_file_path}')
+                    shutil.copyfile(src_file_path, dest_file_path)
                 else:
-                    os.system(f'mv {src_file_path} {dest_file_path}')
+                    shutil.move(src_file_path, dest_file_path)
             # Data files
             elif file.endswith('tsv'):
                 dest_file_path = os.path.join(date_time_folder_path, 'data', file)
-                os.system(f'mv {src_file_path} {dest_file_path}')
+                shutil.move(src_file_path, dest_file_path)
             # Log files
             elif file in ['FL_duration.txt', 'aggregation_samples.txt']:
                 dest_file_path = os.path.join(date_time_folder_path, 'log', file)
-                os.system(f'mv {src_file_path} {dest_file_path}')
+                shutil.move(src_file_path, dest_file_path)
             # State dicts
             elif file.endswith('.pt'):
                 dest_file_path = os.path.join(date_time_folder_path, 'state_dicts', file)
-                os.system(f'mv {src_file_path} {dest_file_path}')
+                shutil.move(src_file_path, dest_file_path)
             # File that indicates moderator to clean workspace
             elif file == 'moderator_clean_ws.txt':
-                os.system(f'rm {src_file_path}')
+                os.remove(src_file_path)
         break
 
 

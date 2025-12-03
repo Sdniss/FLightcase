@@ -10,6 +10,8 @@ import pathlib
 import requests
 import pandas as pd
 import datetime as dt
+from requests import Session
+from requests.adapters import HTTPAdapter, Retry
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -33,7 +35,8 @@ def download_file(url, download_location, username, password, download_if_exists
     returns: Boolean (downloaded?)
     """
 
-    response = requests.get(url, params={'username': username, 'password': password})
+    s = create_http_session()
+    response = s.get(url, params={'username': username, 'password': password})
 
     # Check whether to proceed or not
     if response.status_code != 200:
@@ -96,11 +99,28 @@ def upload_file(url_upload, local_path, username, password, aes_key=None, iv=Non
     # Keep trying to upload (sometimes status code 500 returned by server)
     response_text = ''
     while response_text != 'Upload successful!':
-        response = requests.post(os.path.join(url_upload, os.path.basename(local_path)), files=files,
+        s = create_http_session()
+        response = s.post(os.path.join(url_upload, os.path.basename(local_path)), files=files,
                                  params={'username': username, 'password': password,
                                          'file_size': len(file_bytes)})
         response_text = response.text
         time.sleep(1)
+
+
+def create_http_session():
+    # Sources:
+    # - https://stackoverflow.com/questions/15778466/using-python-requests-sessions-cookies-and-post
+    # - https://github.com/psf/requests/blob/main/docs/user/advanced.rst#example-automatic-retries
+    # - https://stackoverflow.com/questions/15431044/can-i-set-max-retries-for-requests-request
+    s = Session()
+    retries = Retry(
+        total=5000,
+        backoff_factor=0.1,
+        status_forcelist=[502, 503, 504],
+        allowed_methods={'POST', 'GET'},
+    )
+    s.mount('http://', HTTPAdapter(max_retries=retries))
+    return s
 
 
 def wait_for_file(file_path, moderator_download_folder_url, download_username, download_password, aes_key=None, iv=None, private_rsa_key=None, stop_with_stop_file=False):

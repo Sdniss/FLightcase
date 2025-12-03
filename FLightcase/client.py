@@ -20,7 +20,7 @@ from FLightcase.utils.deep_learning.data import get_data_loader, split_data, pre
 from FLightcase.utils.deep_learning.model import get_weights, get_weighted_average_model, import_net_architecture, copy_net
 from FLightcase.utils.deep_learning.evaluation import evaluate
 from FLightcase.utils.deep_learning.general import get_device
-from FLightcase.utils.communication import (wait_for_file, upload_file, clean_up_workspace, send_client_info_to_moderator,
+from FLightcase.utils.communication import (wait_for_file, upload_file, clean_up_workspace, send_client_n_to_moderator,
                                             send_test_df_to_moderator, get_rsa_key_pair, generate_aes_key, rsa_encrypt,
                                             receive_public_key)
 from FLightcase.utils.results import create_test_true_pred_df, create_test_scatterplot, create_test_df_for_server
@@ -100,8 +100,8 @@ def client(settings_path):
         f.write(aes_key_encrypted_client)
     upload_file(moderator_url_ul, aes_key_encrypted_client_path, username_dl_ul, password_dl_ul)
 
-    # Send dataset size and client workspace path to server
-    send_client_info_to_moderator(df.shape[0], workspace_path_client, client_name, moderator_url_ul, username_dl_ul, password_dl_ul, aes_key, iv)
+    # Send dataset size to server
+    send_client_n_to_moderator(df.shape[0], workspace_path_client, client_name, moderator_url_ul, username_dl_ul, password_dl_ul, aes_key, iv)
 
     # Wait for IV and AES key from server
     print('Waiting for IV and AES key from server...')

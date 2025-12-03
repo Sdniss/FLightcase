@@ -190,21 +190,21 @@ def collect_client_info(client_info_dict, workspace_path_server, info_type, file
     return client_info_dict
 
 
-def send_client_info_to_moderator(client_n, client_ws_path, client_name, url_upload, upload_username, upload_password, aes_key, iv):
+def send_client_n_to_moderator(client_n, client_ws_path, client_name, url_upload, upload_username, upload_password, aes_key, iv):
     """
-    Send client information  to moderator
+    Send client dataset size to moderator
 
     :client_n: str, client dataset size
     :client_ws_path: str, path to client workspace
     :client_name: str, client name
     """
-    for tag, info in zip(['dataset_size', 'ws_path'], [client_n, client_ws_path]):
-        print(f'==> Send {tag} to server...')
-        info_txt_path = os.path.join(client_ws_path, f'{client_name}_{tag}.txt')
-        with open(info_txt_path, 'w') as file:
-            file.write(str(info))
 
-        upload_file(url_upload, info_txt_path, upload_username, upload_password, aes_key, iv)
+    print('==> Send dataset size to server...')
+    n_txt_path = os.path.join(client_ws_path, f'{client_name}_dataset_size.txt')
+    with open(n_txt_path, 'w') as file:
+        file.write(str(client_n))
+
+    upload_file(url_upload, n_txt_path, upload_username, upload_password, aes_key, iv)
 
 
 def send_test_df_to_moderator(test_df_for_server, client_name, workspace_path_client, url_upload, upload_username, upload_password, aes_key, iv):

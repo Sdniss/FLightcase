@@ -83,12 +83,14 @@ def prepare_participants_df(bids_root_path, colnames_dict, subject_sessions, mod
     df, path_cols = add_neuro_data_paths(df, modalities_dict, bids_root_path, colnames_dict, derivative_name)
     df = filter_on_data_availability(df, path_cols)
 
+    # Filter label
+    df = df[df[colnames_dict['label']].notna()]
+
     # Update colname_dict (k = v)
     for path_col in path_cols:
         colnames_dict[path_col] = path_col
 
     return df, colnames_dict
-
 
 def extract_subject_sessions(df, colnames_dict, subject_sessions):
     """

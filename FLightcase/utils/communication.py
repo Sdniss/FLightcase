@@ -264,10 +264,9 @@ def clean_up_workspace(workspace_dir_path, who):
         os.mkdir(date_time_folder_path)
 
     # Create subdirectories per category
-    subdirs = ['state_dicts', 'results', 'data', 'settings']
+    subdirs = ['state_dicts', 'results', 'data', 'settings', 'log']
     if who == 'server':
         subdirs.remove('data')
-        subdirs.append('log')
     for subdir in subdirs:
         subdir_path = os.path.join(date_time_folder_path, subdir)
         if not os.path.exists(subdir_path):
@@ -305,7 +304,7 @@ def clean_up_workspace(workspace_dir_path, who):
                 dest_file_path = os.path.join(date_time_folder_path, 'data', file)
                 shutil.move(src_file_path, dest_file_path)
             # Log files
-            elif file in ['FL_duration.txt', 'aggregation_samples.txt']:
+            elif file in ['FL_duration.txt', 'aggregation_samples.txt'] or file.endswith('.log'):
                 dest_file_path = os.path.join(date_time_folder_path, 'log', file)
                 shutil.move(src_file_path, dest_file_path)
             # State dicts

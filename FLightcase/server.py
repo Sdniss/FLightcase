@@ -52,13 +52,13 @@ def server(settings_path):
         settings_dict = json.load(json_file)
     workspace_path_server = settings_dict.get('workspace_path_server')          # Path to server workspace
     initial_state_dict_path = settings_dict.get('initial_state_dict_path')      # Path to initial state dict
-    client_info_dict = settings_dict.get('client_credentials')                  # Initialise client info dict
+    client_names = settings_dict.get('expected_clients')                        # Initialise expected clients
     moderator_url_dl = settings_dict.get('moderator_url_dl')                    # URL where to download from moderator
     moderator_url_ul = settings_dict.get('moderator_url_ul')                    # URL where to upload to moderator
     username_dl_ul = settings_dict.get('username_dl_ul')                        # Username for download and upload
     password_dl_ul = settings_dict.get('password_dl_ul')                        # Password for download and upload
 
-    client_names = client_info_dict.keys()
+    client_info_dict = {client_name: {} for client_name in client_names}        # Initialise client info dict to fill
     FL_plan_path = os.path.join(workspace_path_server, 'FL_plan.json')
     architecture_path = os.path.join(workspace_path_server, 'architecture.py')
 

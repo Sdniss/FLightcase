@@ -269,7 +269,7 @@ def clean_up_workspace(workspace_dir_path, who):
                 dest_file_path = os.path.join(date_time_folder_path, 'results', file)
                 shutil.move(src_file_path, dest_file_path)
             # Settings files
-            elif (any(file.endswith(ext) for ext in ['.json', 'ws_path.txt', 'dataset_size.txt', '.py',
+            elif (any(file.endswith(ext) for ext in ['.json', 'dataset_size.txt', '.py',
                                                     'stop_training.txt', 'aes_key.txt', 'iv.txt', 'public_rsa_key.txt',
                                                     'public_rsa_key_server.txt'])
                   or (any(file.startswith(prefix) for prefix in ['server_aes_key_for', 'server_iv_for']))):

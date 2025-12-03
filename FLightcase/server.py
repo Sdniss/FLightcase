@@ -75,7 +75,6 @@ def server(settings_path):
     client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'aes_key', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul)
     client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'iv', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul)
     client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'dataset_size', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul, private_rsa_key)
-    n_sum_clients = sum([dct['dataset_size'] for dct in client_info_dict.values()])
 
     # Create IV for AES and send to moderator
     print('Creating IV and sending to moderator...')

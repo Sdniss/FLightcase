@@ -56,7 +56,6 @@ def client(settings_path):
     subject_sessions = settings_dict.get('subject_sessions')            # Which subject ids to take into account?
     bids_root_path = settings_dict.get('bids_root_path')                # Path to BIDS root
     batch_size = int(settings_dict.get('batch_size'))                   # Batch size
-    device = get_device(settings_dict.get('device'))                    # Device for DL process (cpu, cuda, cuda:0, ...)
 
     # Create workspace folder
     if not os.path.exists(workspace_path_client):
@@ -140,6 +139,10 @@ def client(settings_path):
     n_epochs_per_round = FL_plan_dict.get('n_epochs_per_round')     # Number of epochs per FL round
 
     # General deep learning settings
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
     criterion = get_criterion(criterion_txt)
     net_architecture = import_net_architecture(architecture_path)
     test_loader = None

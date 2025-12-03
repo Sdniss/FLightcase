@@ -19,6 +19,5 @@
     },
     "subject_sessions": null,
     "bids_root_path": "/path/to/BIDS/root/directory/",
-    "batch_size": 8,
-    "device": "cuda:0"
+    "batch_size": 8
 }

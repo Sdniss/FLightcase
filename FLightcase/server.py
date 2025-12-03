@@ -18,7 +18,7 @@ import warnings
 import numpy as np
 import pandas as pd
 import datetime as dt
-from FLightcase.utils.deep_learning.model import (get_weights, weighted_avg_local_models, get_n_random_pairs_from_dict,
+from FLightcase.utils.deep_learning.model import (get_weights, aggregate_local_models, get_n_random_pairs_from_dict,
                                        get_model_param_info, import_net_architecture, copy_net)
 from FLightcase.utils.communication import (clean_up_workspace, upload_file, collect_client_info, get_rsa_key_pair,
                                             generate_aes_key, rsa_encrypt)
@@ -108,6 +108,7 @@ def server(settings_path):
     n_rounds = int(FL_plan_dict.get('n_rounds'))                    # Number of FL rounds
     n_clients_set = FL_plan_dict.get('n_clients_set')               # Number of clients in set for averaging
     patience_stop = int(FL_plan_dict.get('pat_stop'))               # N fl rounds stagnating val loss before stopping
+    agg_algorithm = FL_plan_dict.get('agg_algorithm')               # Extract aggregation algorithm
     print_FL_plan(FL_plan_dict)
 
     # Load initial network and save
@@ -159,7 +160,7 @@ def server(settings_path):
             log_txt = f'    ==> All clients in sample (round = {fl_round})'
         print(log_txt)
         aggregation_samples_log += f'{log_txt}\n'
-        new_global_state_dict = weighted_avg_local_models(client_info_dict_sample, fl_round)
+        new_global_state_dict = aggregate_local_models(client_info_dict_sample, fl_round, agg_algorithm)
         model_path = os.path.join(workspace_path_server, f'global_model_round_{fl_round}.pt')  # Overwrite model_path
         torch.save(new_global_state_dict, model_path)
 

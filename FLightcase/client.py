@@ -51,20 +51,15 @@ def client(settings_path):
     moderator_url_dl = settings_dict.get('moderator_url_dl')            # URL where to download from moderator
     moderator_url_ul = settings_dict.get('moderator_url_ul')            # URL where to upload to moderator
     derivative_name = settings_dict.get('derivative_name')              # Name of derivative subfolder, else None
-    modalities_dict = settings_dict.get('modalities_to_include')        # Modalities (e.g. {'anat': ['T1w', 'FLAIR']})
     colnames_dict = settings_dict.get('colnames_dict')                  # Colnames dict
     subject_sessions = settings_dict.get('subject_sessions')            # Which subject ids to take into account?
     bids_root_path = settings_dict.get('bids_root_path')                # Path to BIDS root
     batch_size = int(settings_dict.get('batch_size'))                   # Batch size
+    preferred_device = settings_dict.get('preferred_device')            # Preferred device
 
     # Create workspace folder
     if not os.path.exists(workspace_path_client):
         os.makedirs(workspace_path_client)
-
-    # Preprocess participants dataframe + save to workspace path as reference
-    df, colnames_dict = prepare_participants_df(bids_root_path, colnames_dict, subject_sessions,
-                                                modalities_dict, derivative_name)
-    df.to_csv(os.path.join(workspace_path_client, 'participants.tsv'), sep='\t')
 
     # Create RSA keys and send public to moderator
     print('Creating RSA keys and sending public to moderator...')
@@ -98,9 +93,6 @@ def client(settings_path):
     with open(aes_key_encrypted_client_path, 'wb') as f:
         f.write(aes_key_encrypted_client)
     upload_file(moderator_url_ul, aes_key_encrypted_client_path, username_dl_ul, password_dl_ul)
-
-    # Send dataset size to server
-    send_client_n_to_moderator(df.shape[0], workspace_path_client, client_name, moderator_url_ul, username_dl_ul, password_dl_ul, aes_key, iv)
 
     # Wait for IV and AES key from server
     print('Waiting for IV and AES key from server...')
@@ -137,12 +129,21 @@ def client(settings_path):
     criterion_txt = FL_plan_dict.get('criterion')                   # Criterion in txt format, lowercase (e.g. l1loss)
     optimizer_txt = FL_plan_dict.get('optimizer')                   # Optimizer in txt format, lowercase (e.g. adam)
     n_epochs_per_round = FL_plan_dict.get('n_epochs_per_round')     # Number of epochs per FL round
+    modalities_dict = FL_plan_dict.get('modalities_to_include')     # Modalities (e.g. {'anat': ['T1w', 'FLAIR']})
+
+    # Preprocess participants dataframe + save to workspace path as reference
+    df, colnames_dict = prepare_participants_df(bids_root_path, colnames_dict, subject_sessions,
+                                                modalities_dict, derivative_name)
+    df.to_csv(os.path.join(workspace_path_client, 'participants.tsv'), sep='\t')
+
+    # Send dataset size to server
+    send_client_n_to_moderator(df.shape[0], workspace_path_client, client_name, moderator_url_ul, username_dl_ul, password_dl_ul, aes_key, iv)
 
     # General deep learning settings
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
+    if preferred_device.startswith('cuda') and torch.cuda.is_available():
+        device = torch.device(preferred_device)
     else:
-        device = torch.device("cpu")
+        device = torch.device('cpu')
     criterion = get_criterion(criterion_txt)
     net_architecture = import_net_architecture(architecture_path)
     test_loader = None

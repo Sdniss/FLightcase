@@ -74,7 +74,6 @@ def server(settings_path):
     client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'public_rsa_key', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul)
     client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'aes_key', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul)
     client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'iv', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul)
-    client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'dataset_size', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul, private_rsa_key)
 
     # Create IV for AES and send to moderator
     print('Creating IV and sending to moderator...')
@@ -101,6 +100,9 @@ def server(settings_path):
     # Note: Currently without encryption
     upload_file(moderator_url_ul, FL_plan_path, username_dl_ul, password_dl_ul)
     upload_file(moderator_url_ul, architecture_path, username_dl_ul, password_dl_ul)
+
+    # Collect client dataset sizes
+    client_info_dict = collect_client_info(client_info_dict, workspace_path_server, 'dataset_size', '.txt', moderator_url_dl, username_dl_ul, password_dl_ul, private_rsa_key)
 
     # Extract and print FL plan
     with open(FL_plan_path, 'r') as json_file:

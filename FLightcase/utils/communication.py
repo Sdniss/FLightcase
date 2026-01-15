@@ -31,12 +31,20 @@ def file_present_in_moderator_ws(url, username, password):
 def download_file(url, download_location, username, password, download_if_exists=False, encrypted_aes_key=None, iv=None, private_rsa_key=None):
     """
     Adapted from: https://realpython.com/python-download-file-from-url/
+    Additional source: https://stackoverflow.com/questions/60798728/put-a-time-limit-on-a-request (to avoid hanging when no response from server)
     Action: downloads.
     returns: Boolean (downloaded?)
     """
 
     s = create_http_session()
-    response = s.get(url, params={'username': username, 'password': password})
+    server_responded = False
+    while not server_responded:
+        try:
+            response = s.get(url, params={'username': username, 'password': password}, timeout=10)
+            server_responded = True
+        except requests.exceptions.ConnectTimeout:
+            print('Server did not respond. Trying again')
+            time.sleep(1)
 
     # Check whether to proceed or not
     if response.status_code != 200:
@@ -114,7 +122,7 @@ def create_http_session():
     # - https://stackoverflow.com/questions/15431044/can-i-set-max-retries-for-requests-request
     s = Session()
     retries = Retry(
-        total=5000,
+        total=5,
         backoff_factor=0.1,
         status_forcelist=[500, 502, 503, 504],
         allowed_methods={'POST', 'GET'},
@@ -146,6 +154,7 @@ def wait_for_file(file_path, moderator_download_folder_url, download_username, d
             stop_training = True
             break
         pass
+        time.sleep(1)
 
     return stop_training
 

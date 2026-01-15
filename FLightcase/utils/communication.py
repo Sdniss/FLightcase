@@ -116,7 +116,7 @@ def create_http_session():
     retries = Retry(
         total=5000,
         backoff_factor=0.1,
-        status_forcelist=[502, 503, 504],
+        status_forcelist=[500, 502, 503, 504],
         allowed_methods={'POST', 'GET'},
     )
     s.mount('http://', HTTPAdapter(max_retries=retries))

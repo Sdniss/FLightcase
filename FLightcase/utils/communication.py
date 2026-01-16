@@ -31,7 +31,9 @@ def file_present_in_moderator_ws(url, username, password):
 def download_file(url, download_location, username, password, download_if_exists=False, encrypted_aes_key=None, iv=None, private_rsa_key=None):
     """
     Adapted from: https://realpython.com/python-download-file-from-url/
-    Additional source: https://stackoverflow.com/questions/60798728/put-a-time-limit-on-a-request (to avoid hanging when no response from server)
+    Additional source:
+    - https://stackoverflow.com/questions/60798728/put-a-time-limit-on-a-request (to avoid hanging when no response from server)
+    - ChatGPT
     Action: downloads.
     returns: Boolean (downloaded?)
     """
@@ -40,10 +42,13 @@ def download_file(url, download_location, username, password, download_if_exists
     server_responded = False
     while not server_responded:
         try:
-            response = s.get(url, params={'username': username, 'password': password}, timeout=10)
+            response = s.get(url, params={'username': username, 'password': password}, timeout=(10, 10), stream=True)
             server_responded = True
-        except requests.exceptions.ConnectTimeout:
-            print('Server did not respond. Trying again')
+        except requests.exceptions.ConnectTimeout as err:
+            print(f'Trying again after following exception: {err}')
+            time.sleep(1)
+        except requests.exceptions.ConnectionError as err:
+            print(f'Trying again after following exception: {err}')
             time.sleep(1)
 
     # Check whether to proceed or not
@@ -96,6 +101,7 @@ def upload_file(url_upload, local_path, username, password, aes_key=None, iv=Non
     Sources:
     - https://stackoverflow.com/questions/68477/send-file-using-post-from-a-python-script
     - https://proxiesapi.com/articles/a-beginner-s-guide-to-uploading-files-with-python-requests
+    - ChatGPT
     """
     with open(local_path, 'rb') as f:
         file_bytes = f.read()
@@ -108,10 +114,11 @@ def upload_file(url_upload, local_path, username, password, aes_key=None, iv=Non
     response_text = ''
     while response_text != 'Upload successful!':
         s = create_http_session()
-        response = s.post(os.path.join(url_upload, os.path.basename(local_path)), files=files,
+        with s.post(os.path.join(url_upload, os.path.basename(local_path)), files=files,
                                  params={'username': username, 'password': password,
-                                         'file_size': len(file_bytes)})
-        response_text = response.text
+                                         'file_size': len(file_bytes)}, stream=True, timeout=(10, 10)) as response:
+            response.raise_for_status()
+            response_text = response.text
         time.sleep(1)
 
 
